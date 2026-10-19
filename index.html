@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Juzzy Train">
+<meta name="theme-color" content="#7A2E58">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Juzzy Training</title>
+<style>
+:root{--plum:#7A2E58;--mauve:#A64D79;--ink:#2B1A25;--sub:#6B5A64;--bg:#F6F1F4;--card:#fff;--line:#E5DAE0;--good:#1E7B45;--goodbg:#DDF3E5;--bad:#A3132A;--badbg:#FBE0E4;--deload:#5B6C7D}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+header{position:sticky;top:0;z-index:10;background:var(--plum);color:#fff;padding:calc(env(safe-area-inset-top) + 10px) 16px 10px}
+.hrow{display:flex;align-items:center;justify-content:space-between;gap:8px}
+h1{font-size:19px;margin:0;font-weight:700;letter-spacing:.2px}
+.wk{display:flex;align-items:center;background:rgba(255,255,255,.16);border-radius:20px}
+.wk button{background:none;border:0;color:#fff;font-size:20px;width:34px;height:34px}
+.wk span{font-weight:700;font-size:14px;min-width:78px;text-align:center}
+.days{display:flex;gap:6px;overflow-x:auto;margin-top:10px;padding-bottom:2px;scrollbar-width:none}
+.days::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:0;border-radius:18px;padding:7px 13px;font-weight:600;font-size:14px;background:rgba(255,255,255,.16);color:#fff}
+.chip.on{background:#fff;color:var(--plum)}
+main{padding:12px 12px calc(84px + env(safe-area-inset-bottom));max-width:640px;margin:0 auto}
+.card{background:var(--card);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 1px 2px rgba(60,20,40,.08)}
+.banner{border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:14px}
+.banner.deload{background:#E6EBF0;color:var(--deload);font-weight:600}
+.banner.wu{background:#fff;border-left:4px solid var(--mauve);color:var(--sub)}
+.dayhead{border-radius:14px;padding:14px;color:#fff;margin-bottom:12px}
+.dayhead b{font-size:20px;display:block}
+.ex .top{display:flex;gap:10px;align-items:flex-start}
+.badge{flex:0 0 auto;min-width:34px;height:34px;border-radius:9px;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px}
+.ex h3{margin:0;font-size:16.5px;line-height:1.25}
+.meta{color:var(--sub);font-size:13.5px;margin-top:2px}
+.note{font-size:13px;color:var(--sub);font-style:italic;margin-top:6px}
+.target{margin-top:10px;padding:9px 11px;border-radius:10px;background:#F3E8EE;font-size:14.5px}
+.target b{color:var(--plum)}
+.target.up{background:var(--goodbg)}
+.target.up b{color:var(--good)}
+.inputs{display:flex;gap:8px;margin-top:10px;align-items:stretch}
+.field{flex:1;display:flex;flex-direction:column}
+.field label{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.field input{width:100%;font-size:20px;font-weight:700;padding:9px 10px;border:2px solid var(--line);border-radius:10px;color:var(--ink);background:#fff;-webkit-appearance:none}
+.field input:focus{outline:none;border-color:var(--mauve)}
+.field input.good{border-color:var(--good);background:var(--goodbg)}
+.field input.bad{border-color:var(--bad);background:var(--badbg)}
+.btns{display:flex;gap:8px;margin-top:10px}
+.btn{flex:1;border:0;border-radius:10px;padding:10px;font-weight:700;font-size:14px;background:#F3E8EE;color:var(--plum)}
+.btn.primary{background:var(--plum);color:#fff}
+.how{margin-top:10px;display:none}
+.how.open{display:block}
+.how img{width:100%;border-radius:10px;border:1px solid var(--line);display:block}
+.how p{margin:8px 0 0;font-size:14px}
+.how .mus{font-weight:700;color:var(--sub);font-size:13px}
+.hist{display:flex;gap:4px;margin-top:10px;overflow-x:auto}
+.hist div{flex:1 0 46px;text-align:center;font-size:11px;color:var(--sub);background:#FAF6F8;border-radius:8px;padding:4px 2px}
+.hist div b{display:block;font-size:12.5px;color:var(--ink)}
+.hist div.cur{outline:2px solid var(--mauve)}
+.hist div.g{background:var(--goodbg)}.hist div.r{background:var(--badbg)}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:10}
+nav button{flex:1;border:0;background:none;padding:9px 0 8px;font-size:11.5px;font-weight:600;color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button svg{width:24px;height:24px}
+nav button.on{color:var(--plum)}
+h2{font-size:17px;margin:4px 2px 10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat{background:#FAF6F8;border-radius:10px;padding:10px}
+.stat small{display:block;font-size:11px;color:var(--sub);font-weight:700;text-transform:uppercase}
+.stat b{font-size:20px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:7px 4px;text-align:center;border-bottom:1px solid var(--line)}
+th{font-size:11px;color:var(--sub);text-transform:uppercase}
+td.g{color:var(--good);font-weight:700}td.r{color:var(--bad);font-weight:700}
+select,input[type=date],input[type=text]{font-size:16px;padding:9px;border:2px solid var(--line);border-radius:10px;width:100%;background:#fff;color:var(--ink)}
+.row{display:flex;gap:8px;align-items:center;margin-top:8px}
+.row label{flex:1;font-weight:600;font-size:14px}
+.row input,.row select{flex:1.2}
+.seg{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.seg button{flex:1;border:2px solid var(--line);background:#fff;border-radius:10px;padding:8px 4px;font-weight:700;font-size:13px;color:var(--sub)}
+.seg button.on{border-color:var(--plum);background:var(--plum);color:#fff}
+#timer{position:fixed;inset:0;background:rgba(43,26,37,.94);color:#fff;z-index:50;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+#timer.open{display:flex}
+#tnum{font-size:96px;font-weight:800;font-variant-numeric:tabular-nums}
+#tname{font-size:16px;opacity:.8;padding:0 20px;text-align:center}
+#timer .btns{width:min(90vw,360px)}
+#timer .btn{background:rgba(255,255,255,.15);color:#fff;padding:14px}
+.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 16px;border-radius:20px;font-size:14px;opacity:0;transition:opacity .25s;z-index:60;pointer-events:none}
+.toast.show{opacity:1}
+.muted{color:var(--sub);font-size:13px}
+svg.chart{width:100%;height:170px;display:block}
+.saved{font-size:12px;color:var(--good);font-weight:700;margin-left:auto;opacity:0;transition:opacity .3s}
+.saved.show{opacity:1}
+</style>
+</head>
+<body>
+<header>
+  <div class="hrow"><h1 id="title">Juzzy Training</h1>
+    <div class="wk"><button id="wkm" aria-label="Previous week">‹</button><span id="wkl">Week 1</span><button id="wkp" aria-label="Next week">›</button></div></div>
+  <div class="days" id="days"></div>
+</header>
+<main id="main"></main>
+<nav id="nav">
+ <button data-t="workout" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/></svg>Workout</button>
+ <button data-t="progress"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19h16M6 15l4-4 3 3 5-6"/></svg>Progress</button>
+ <button data-t="tracker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>Daily</button>
+ <button data-t="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>Settings</button>
+</nav>
+<div id="timer"><div id="tname"></div><div id="tnum">0:00</div><div class="btns"><button class="btn" id="tminus">−15s</button><button class="btn" id="tplus">+15s</button><button class="btn" id="tstop">Done</button></div></div>
+<div class="toast" id="toast"></div>
+<script>
+const DAYS=[{"name": "Upper A", "focus": "Chest & Back", "color": "#7A2E58", "ex": [{"id": "d1A1", "code": "A1", "name": "Incline DB / BB Press", "sets": 4, "min": 6, "max": 10, "rest": 120, "jump": 2.5, "note": "Last set to near failure", "img": "incline_press", "mus": "Upper chest, front delts, triceps", "cue": "Bench 30–45°. Lower to upper chest, elbows ~45° from body. Press up and slightly back.", "cap": ["Weights at upper chest", "Press up and slightly back", "Arms straight over shoulders"]}, {"id": "d1A2", "code": "A2", "name": "Pull-Ups (assisted if needed)", "sets": 4, "min": 6, "max": 10, "rest": 120, "jump": 2.5, "note": "Full hang → chin over bar. 5-sec negatives if stuck. Assisted: log assist kg as negative", "img": "pullup", "mus": "Lats, upper back, biceps", "cue": "Start from a dead hang. Drive elbows down to ribs, chin over bar. Lower slowly.", "cap": ["Dead hang, arms straight", "Drive elbows down", "Chin over the bar"]}, {"id": "d1B1", "code": "B1", "name": "Seated Cable Row", "sets": 3, "min": 8, "max": 12, "rest": 90, "jump": 2.5, "note": "Squeeze shoulder blades, 1-sec hold", "img": "cable_row", "mus": "Mid back, lats, rear delts", "cue": "Chest up, slight knee bend. Pull handle to belly button, squeeze shoulder blades, return with control.", "cap": ["Arms long, chest up", "Pull handle to belly", "Squeeze shoulder blades"]}, {"id": "d1B2", "code": "B2", "name": "Machine / Flat DB Chest Press", "sets": 3, "min": 8, "max": 12, "rest": 90, "jump": 2.5, "note": "", "img": "flat_press_db", "mus": "Chest, front delts, triceps", "cue": "Shoulder blades pinched back. Lower DBs to chest level, press up until arms straight.", "cap": ["DBs at chest, blades pinched", "Press straight up", "Arms locked over chest"]}, {"id": "d1C1", "code": "C1", "name": "Cable Lateral Raise", "sets": 4, "min": 12, "max": 20, "rest": 60, "jump": 1, "note": "PRIORITY – slow, no swinging", "img": "lateral_raise", "mus": "Side delts (shoulder width)", "cue": "Slight elbow bend. Raise arms out to shoulder height, lead with elbows, lower slowly. No swinging.", "cap": ["Arms by sides, soft elbows", "Lead with the elbows", "Hands to shoulder height"]}, {"id": "d1C2", "code": "C2", "name": "Cable Face Pull", "sets": 3, "min": 12, "max": 15, "rest": 60, "jump": 2.5, "note": "Rope to forehead, elbows high", "img": "face_pull", "mus": "Rear delts, upper back, rotator cuff", "cue": "Rope at head height. Pull towards forehead, elbows high, finish with hands beside ears.", "cap": ["Arms straight to rope", "Pull to face, elbows high", "Hands beside ears"]}, {"id": "d1D1", "code": "D1", "name": "EZ-Bar / DB Curl  (superset D2)", "sets": 3, "min": 8, "max": 12, "rest": 0, "jump": 1, "note": "Straight into D2", "img": "curl", "mus": "Biceps", "cue": "Elbows pinned at your sides. Curl up, squeeze, lower fully. No body swing.", "cap": ["Arms straight, elbows pinned", "Curl, no swinging", "Squeeze at the top"]}, {"id": "d1D2", "code": "D2", "name": "Cable Triceps Pushdown", "sets": 3, "min": 10, "max": 15, "rest": 60, "jump": 2.5, "note": "", "img": "pushdown", "mus": "Triceps", "cue": "Elbows locked at sides. Push down until arms are straight, control back up to chest height.", "cap": ["Hands at chest, elbows in", "Push down", "Arms straight, squeeze"]}, {"id": "d1E", "code": "E", "name": "Cable Chest Fly (high-to-low)", "sets": 3, "min": 12, "max": 15, "rest": 60, "jump": 2.5, "note": "CHEST – slight elbow bend, squeeze hands together", "img": "cable_fly", "mus": "Chest (inner/lower), front delts", "cue": "Pulleys high. Slight elbow bend, sweep hands down and together in front of hips, squeeze, return slowly.", "cap": ["Arms wide, slight bend", "Sweep down and in", "Hands meet, squeeze chest"]}], "wu": "5 min easy cardio → Band pull-aparts ×15 → Push-ups ×10 → Dead hang 20 s"}, {"name": "Lower A", "focus": "Quads", "color": "#2E5E7A", "ex": [{"id": "d2A", "code": "A", "name": "Back Squat or Hack Squat", "sets": 4, "min": 6, "max": 10, "rest": 150, "jump": 2.5, "note": "3-sec down, controlled", "img": "squat", "mus": "Quads, glutes, core", "cue": "Bar on upper back, brace hard. Sit down between your heels to thighs parallel or lower, knees track over toes, drive up.", "cap": ["Brace, bar on upper back", "Sit down between heels", "Thighs parallel or lower"]}, {"id": "d2B", "code": "B", "name": "Romanian Deadlift (BB / DB)", "sets": 3, "min": 8, "max": 10, "rest": 120, "jump": 2.5, "note": "Hips back, feel hamstrings", "img": "rdl", "mus": "Hamstrings, glutes, lower back", "cue": "Soft knees. Push hips back, bar slides down thighs until hamstrings stretch, back flat. Drive hips forward to stand.", "cap": ["Stand tall, soft knees", "Push hips back", "Hamstring stretch, back flat"]}, {"id": "d2C", "code": "C", "name": "DB Bulgarian Split Squat (reps each leg)", "sets": 3, "min": 8, "max": 12, "rest": 90, "jump": 2, "note": "Rear foot elevated", "img": "bulgarian", "mus": "Quads, glutes", "cue": "Rear foot on bench. Drop straight down until front thigh is parallel, push through front heel.", "cap": ["Rear foot on bench", "Drop straight down", "Front thigh parallel"]}, {"id": "d2D", "code": "D", "name": "Leg Extension", "sets": 3, "min": 12, "max": 15, "rest": 60, "jump": 2.5, "note": "Pause at top", "img": "leg_ext", "mus": "Quads", "cue": "Pad on lower shin. Straighten legs fully, pause 1 sec at top, lower slowly.", "cap": ["Knees bent, pad on shins", "Straighten legs", "Pause, quads squeezed"]}, {"id": "d2E", "code": "E", "name": "Lying / Seated Leg Curl", "sets": 3, "min": 10, "max": 15, "rest": 60, "jump": 2.5, "note": "", "img": "leg_curl", "mus": "Hamstrings", "cue": "Pad above heels. Curl heels towards glutes, squeeze, lower slowly. Hips stay down.", "cap": ["Legs straight, hips down", "Curl heels up", "Heels to glutes"]}, {"id": "d2F", "code": "F", "name": "Standing Calf Raise", "sets": 4, "min": 10, "max": 15, "rest": 60, "jump": 5, "note": "Full stretch at bottom, 1-sec pause", "img": "calf_stand", "mus": "Calves", "cue": "Balls of feet on a step. Drop heels for a full stretch, rise as high as possible, pause.", "cap": ["Heels dropped, full stretch", "Rise onto toes", "Highest point, pause"]}, {"id": "d2G", "code": "G", "name": "Hanging Knee / Leg Raise", "sets": 3, "min": 10, "max": 15, "rest": 60, "jump": 0, "note": "Add reps, then progress to straight legs", "img": "hanging_raise", "mus": "Lower abs, hip flexors", "cue": "Dead hang, no swinging. Curl knees up towards chest, tilt pelvis, lower slowly.", "cap": ["Dead hang, no swing", "Lift knees", "Knees to chest, tilt pelvis"]}, {"id": "d2H", "code": "H", "name": "Ab Wheel Rollout (or Plank 30–60 s)", "sets": 3, "min": 8, "max": 12, "rest": 60, "jump": 0, "note": "CORE – ribs down, hips don't sag", "img": "ab_wheel", "mus": "Abs (anti-extension), core strength", "cue": "Kneel, brace like you're about to be punched. Roll out only as far as you can keep your lower back flat, pull back with abs.", "cap": ["Kneel, wheel under shoulders", "Roll out, abs braced", "Furthest with flat back"]}], "wu": "5 min bike / incline walk → Bodyweight squat ×10 → Reverse lunge ×10 → World's greatest stretch ×5 ea"}, {"name": "Upper B", "focus": "Shoulders, Lats & Arms", "color": "#8A4B1F", "ex": [{"id": "d3A", "code": "A", "name": "Seated DB Shoulder Press", "sets": 4, "min": 6, "max": 10, "rest": 120, "jump": 2, "note": "", "img": "shoulder_press", "mus": "Front & side delts, triceps", "cue": "Back on upright bench. Start with DBs at ear height, press overhead until arms are straight.", "cap": ["DBs at ear height", "Press overhead", "Arms straight up"]}, {"id": "d3B", "code": "B", "name": "Wide-Grip Lat Pulldown", "sets": 4, "min": 8, "max": 12, "rest": 90, "jump": 2.5, "note": "Pull to upper chest, elbows down", "img": "lat_pulldown", "mus": "Lats (back width), biceps", "cue": "Wide grip, lean back slightly. Pull bar to upper chest, elbows down and back, control up.", "cap": ["Arms long, wide grip", "Pull elbows down", "Bar to upper chest"]}, {"id": "d3C", "code": "C", "name": "Flat BB Bench / Machine Press", "sets": 3, "min": 8, "max": 12, "rest": 90, "jump": 2.5, "note": "", "img": "flat_press_bb", "mus": "Chest, front delts, triceps", "cue": "Eyes under bar, feet planted. Lower bar to mid-chest, press up. Shoulder blades stay pinched.", "cap": ["Bar touches mid-chest", "Press straight up", "Lockout over shoulders"]}, {"id": "d3D", "code": "D", "name": "One-Arm DB Row (reps each side)", "sets": 3, "min": 8, "max": 12, "rest": 90, "jump": 2, "note": "Pull to hip", "img": "db_row", "mus": "Lats, mid back", "cue": "Hand and knee on bench, back flat. Pull DB to hip, elbow close to body, lower to full stretch.", "cap": ["Arm hanging, back flat", "Pull to hip", "Elbow high, squeeze"]}, {"id": "d3E", "code": "E", "name": "DB or Cable Lateral Raise", "sets": 4, "min": 12, "max": 20, "rest": 60, "jump": 1, "note": "PRIORITY – last set drop set", "img": "lateral_raise", "mus": "Side delts (shoulder width)", "cue": "Slight elbow bend. Raise arms out to shoulder height, lead with elbows, lower slowly. No swinging.", "cap": ["Arms by sides, soft elbows", "Lead with the elbows", "Hands to shoulder height"]}, {"id": "d3F", "code": "F", "name": "Reverse Pec Deck / Cable Rear Delt Fly", "sets": 3, "min": 12, "max": 15, "rest": 60, "jump": 2.5, "note": "", "img": "rear_delt", "mus": "Rear delts, upper back", "cue": "Arms in front at shoulder height. Sweep arms out wide in an arc, squeeze shoulder blades, return slowly.", "cap": ["Arms in front", "Sweep out wide", "Arms in a T, squeeze"]}, {"id": "d3G1", "code": "G1", "name": "Incline DB Curl  (superset G2)", "sets": 3, "min": 10, "max": 12, "rest": 0, "jump": 1, "note": "Straight into G2", "img": "incline_curl", "mus": "Biceps (long head)", "cue": "Bench ~45°, arms hang straight down. Curl without moving elbows forward.", "cap": ["Arms hang straight", "Curl, elbows still", "Squeeze at top"]}, {"id": "d3G2", "code": "G2", "name": "Overhead Cable Triceps Extension", "sets": 3, "min": 10, "max": 12, "rest": 60, "jump": 2.5, "note": "", "img": "oh_triceps", "mus": "Triceps (long head)", "cue": "Face away from pulley, elbows by ears. Extend arms forward/up until straight, stretch back behind head.", "cap": ["Hands behind head", "Extend forward", "Arms straight"]}, {"id": "d3H", "code": "H", "name": "Pallof Press (reps each side)", "sets": 3, "min": 10, "max": 12, "rest": 60, "jump": 2.5, "note": "CORE – cable to your side at chest height; press out, don't twist", "img": "pallof", "mus": "Obliques, deep core (anti-rotation)", "cue": "Stand side-on to a chest-height cable. Hold handle at chest, press straight out, hold 2 sec, don't let the cable twist you.", "cap": ["Handle at chest", "Press straight out", "Hold 2 s, no twist"]}], "wu": "5 min easy cardio → Band pull-aparts ×15 → Light DB press ×12 → Dead hang 20 s"}, {"name": "Lower B", "focus": "Glutes & Hamstrings", "color": "#2E6B4A", "ex": [{"id": "d4A", "code": "A", "name": "Deadlift / Trap-Bar Deadlift", "sets": 3, "min": 5, "max": 8, "rest": 150, "jump": 5, "note": "Leave 1–2 reps in reserve", "img": "deadlift", "mus": "Glutes, hamstrings, back, grip", "cue": "Bar over mid-foot, flat back, chest up. Push the floor away, stand tall, lower the same way.", "cap": ["Bar over mid-foot, flat back", "Push the floor away", "Stand tall, hips through"]}, {"id": "d4B", "code": "B", "name": "Barbell Hip Thrust", "sets": 4, "min": 8, "max": 12, "rest": 90, "jump": 5, "note": "Pause 1 sec at top", "img": "hip_thrust", "mus": "Glutes", "cue": "Upper back on bench, bar on hips (use a pad). Drive hips up until body is flat, chin tucked, pause 1 sec.", "cap": ["Shoulders on bench, hips low", "Drive hips up", "Body flat, squeeze glutes"]}, {"id": "d4C", "code": "C", "name": "Leg Press", "sets": 3, "min": 10, "max": 15, "rest": 90, "jump": 10, "note": "Feet mid-platform", "img": "leg_press", "mus": "Quads, glutes", "cue": "Feet mid-platform. Lower until knees are ~90°, lower back stays on the pad, press without locking knees.", "cap": ["Knees bent ~90°", "Press through heels", "Legs long, knees soft"]}, {"id": "d4D", "code": "D", "name": "DB Walking Lunge (reps each leg)", "sets": 2, "min": 10, "max": 12, "rest": 90, "jump": 2, "note": "", "img": "lunge", "mus": "Quads, glutes", "cue": "Long step, drop back knee towards floor, front shin near vertical, step through.", "cap": ["Stand tall", "Long step forward", "Back knee near floor"]}, {"id": "d4E", "code": "E", "name": "Seated / Lying Leg Curl", "sets": 3, "min": 10, "max": 15, "rest": 60, "jump": 2.5, "note": "", "img": "leg_curl", "mus": "Hamstrings", "cue": "Pad above heels. Curl heels towards glutes, squeeze, lower slowly. Hips stay down.", "cap": ["Legs straight, hips down", "Curl heels up", "Heels to glutes"]}, {"id": "d4F", "code": "F", "name": "Seated Calf Raise", "sets": 4, "min": 12, "max": 20, "rest": 60, "jump": 5, "note": "", "img": "calf_seated", "mus": "Calves (soleus)", "cue": "Pad on knees, balls of feet on block. Full stretch at bottom, rise as high as possible.", "cap": ["Heels dropped low", "Push through balls of feet", "Heels high, pause"]}, {"id": "d4G", "code": "G", "name": "Cable Crunch", "sets": 3, "min": 12, "max": 15, "rest": 60, "jump": 2.5, "note": "", "img": "cable_crunch", "mus": "Abs (rectus abdominis)", "cue": "Kneel facing a high pulley, rope by your face. Crunch ribs towards hips, keep hips still.", "cap": ["Rope by face, hips high", "Curl ribs down", "Elbows to thighs"]}, {"id": "d4H", "code": "H", "name": "Farmer's Carry (log metres as reps)", "sets": 3, "min": 30, "max": 40, "rest": 90, "jump": 2, "note": "CORE/GRIP – heavy DBs, tall posture, brace", "img": "farmer", "mus": "Core, grip, traps", "cue": "Heavy DBs at your sides. Stand tall, brace, walk with short controlled steps. Don't lean.", "cap": ["Heavy DBs, stand tall", "Short, steady steps", "Keep walking, brace"]}], "wu": "5 min bike / incline walk → Glute bridge ×15 → Air squat ×10 → World's greatest stretch ×5 ea"}];
+DAYS.push({name:'Conditioning',focus:'Optional · max 20 min',color:'#4A4A4A',ex:[],wu:'',cond:true});
+const KEY='juzzy_train_v1';
+let S;try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!S){const d=new Date();const off=(8-d.getDay())%7;d.setDate(d.getDate()+(d.getDay()===1?0:off));S={start:iso(d),targets:{protein:180,water:5,sleep:7},logs:{},daily:{},weekOverride:null}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('Could not save – storage full or blocked')}}
+function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function parse(s){const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)}
+function autoWeek(){const diff=Math.floor((parse(iso(new Date()))-parse(S.start))/864e5);return Math.min(6,Math.max(1,Math.floor(diff/7)+1))}
+let week=S.weekOverride||autoWeek();
+function dayIdx(){const wd=new Date().getDay();return {1:0,2:1,4:2,5:3,6:4}[wd]??({0:0,3:2}[wd])}
+let day=dayIdx(), tab='workout';
+const $=s=>document.querySelector(s);
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),1600)}
+function fmt(kg){return kg==null||kg===''?'':(+kg===0?'BW':(+kg%1?(+kg).toFixed(1):+kg)+' kg')}
+function log(id,w){return (S.logs[id]||{})[w]}
+function prevLog(id,w){for(let i=Math.min(w-1,5);i>=1;i--){const l=log(id,i);if(l&&l.reps!==''&&l.reps!=null)return {...l,w:i}}return null}
+function cmp(a,b){if(!a||!b||a.reps===''||b.reps===''||a.reps==null||b.reps==null)return 0;const ak=+a.kg||0,bk=+b.kg||0;if(ak>bk)return 1;if(ak<bk)return -1;return +a.reps>+b.reps?1:(+a.reps<+b.reps?-1:0)}
+function target(e,w){
+  if(w===6){const p=prevLog(e.id,6);return {cls:'',html:p?`Deload: <b>${Math.ceil(e.sets/2)} sets × ${e.min}–${e.max} @ ${fmt(p.kg)}</b>`:`Deload: <b>${Math.ceil(e.sets/2)} sets</b>, light & easy`}}
+  const p=prevLog(e.id,w);
+  if(!p)return {cls:'',html:`First time: pick a weight you can do <b>${e.min}–${e.max} reps</b> with 1–2 left in the tank`};
+  if(+p.reps>=e.max){const nk=(+p.kg||0)+(+e.jump||0);return {cls:'up',html:`▲ Go up: <b>${e.jump?fmt(nk):'add reps / harder variation'} × ${e.min}+</b> <span class="muted">(wk ${p.w}: ${fmt(p.kg)} × ${p.reps})</span>`}}
+  return {cls:'',html:`Beat it: <b>${fmt(p.kg)} × ${Math.min(+p.reps+1,e.max)}</b> <span class="muted">(wk ${p.w}: ${fmt(p.kg)} × ${p.reps})</span>`}
+}
+function header(){
+  $('#wkl').textContent=week===6?'Deload wk 6':'Week '+week;
+  document.querySelector('.wk').style.visibility=(tab==='workout')?'visible':'hidden';
+  const d=$('#days');d.innerHTML='';
+  d.style.display=tab==='workout'?'flex':'none';
+  DAYS.forEach((x,i)=>{const b=document.createElement('button');b.className='chip'+(i===day?' on':'');b.textContent=x.name;b.onclick=()=>{day=i;render();scrollTo(0,0)};d.appendChild(b)});
+  const titles={workout:'Juzzy Training',progress:'Progress',tracker:'Daily Tracker',settings:'Settings'};$('#title').textContent=titles[tab];
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
+}
+function render(){header();({workout:rWorkout,progress:rProgress,tracker:rTracker,settings:rSettings})[tab]()}
+function rWorkout(){
+  const D=DAYS[day],m=$('#main');let h='';
+  h+=`<div class="dayhead" style="background:${D.color}"><b>${D.name}</b>${D.focus}</div>`;
+  if(D.cond){h+=`<div class="card"><h3>20-min EMOM (repeat ×4)</h3><p>Min 1: 15 KB Swings<br>Min 2: 12 Goblet Squats<br>Min 3: 10 Push-Ups<br>Min 4: 20 Mountain Climbers<br>Min 5: Rest</p><p class="muted">Or 25–30 min incline walk / easy bike. Skip it if recovery or sleep is poor. Train early or after sunset, drink water + ORS.</p></div>`;m.innerHTML=h;return}
+  if(week===6)h+=`<div class="banner deload">Deload week: half the sets, same weights. Recover, then start a new block heavier.</div>`;
+  h+=`<div class="banner wu"><b>Warm-up:</b> ${D.wu}</div>`;
+  D.ex.forEach(e=>{
+    const t=target(e,week),l=log(e.id,week)||{},p=prevLog(e.id,week),c=week<6?cmp(l,p):0;
+    const cls=c>0?'good':(c<0?'bad':'');
+    let hist='';for(let w=1;w<=6;w++){const x=log(e.id,w);const pc=w>1&&w<6?cmp(x,prevLog(e.id,w)):0;hist+=`<div class="${w===week?'cur':''} ${pc>0?'g':pc<0?'r':''}">${w===6?'DL':'W'+w}<b>${x&&x.reps?fmt(x.kg).replace(' kg','')+'×'+x.reps:'–'}</b></div>`}
+    h+=`<div class="card ex" id="c-${e.id}"><div class="top"><div class="badge" style="background:${D.color}">${e.code}</div><div style="flex:1"><h3>${e.name}</h3><div class="meta">${week===6?Math.ceil(e.sets/2):e.sets} sets × ${e.min}–${e.max} reps · rest ${e.rest?e.rest+'s':'none (superset)'}</div></div></div>
+    ${e.note?`<div class="note">${e.note}</div>`:''}
+    <div class="target ${t.cls}">${t.html}</div>
+    <div class="inputs"><div class="field"><label>kg (0 = bodyweight)</label><input inputmode="decimal" data-id="${e.id}" data-f="kg" value="${l.kg??''}" class="${cls}" placeholder="${p?(p.kg??''):''}"></div>
+    <div class="field"><label>Reps (lowest set)</label><input inputmode="numeric" data-id="${e.id}" data-f="reps" value="${l.reps??''}" class="${cls}" placeholder="${e.min}–${e.max}"></div></div>
+    <div class="btns"><button class="btn" data-how="${e.id}">How to</button>${e.rest?`<button class="btn primary" data-rest="${e.rest}" data-n="${e.name}">Rest ${e.rest}s</button>`:''}</div>
+    <div class="how" id="h-${e.id}"><img loading="lazy" src="img/${e.img}.jpg" alt="${e.name}: ${e.cap.join(', ')}"><p class="mus">Works: ${e.mus}</p><p>${e.cue}</p></div>
+    <div class="hist">${hist}</div></div>`});
+  m.innerHTML=h;
+  m.querySelectorAll('input[data-id]').forEach(i=>i.addEventListener('input',ev=>{const id=i.dataset.id;S.logs[id]=S.logs[id]||{};const L=S.logs[id][week]=S.logs[id][week]||{};L[i.dataset.f]=i.value.trim()===''?'':i.value.replace(',','.');save()}));
+  m.querySelectorAll('input[data-id]').forEach(i=>i.addEventListener('change',()=>{const y=scrollY;rWorkout();scrollTo(0,y);toast('Saved')}));
+  m.querySelectorAll('[data-how]').forEach(b=>b.onclick=()=>{const el=$('#h-'+b.dataset.how);el.classList.toggle('open');b.textContent=el.classList.contains('open')?'Hide':'How to'});
+  m.querySelectorAll('[data-rest]').forEach(b=>b.onclick=()=>startTimer(+b.dataset.rest,b.dataset.n));
+}
+// timer
+let tLeft=0,tInt=null,actx=null;
+function beep(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();[0,0.25,0.5].forEach(o=>{const g=actx.createGain(),os=actx.createOscillator();os.frequency.value=880;os.connect(g);g.connect(actx.destination);g.gain.setValueAtTime(0.25,actx.currentTime+o);g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+o+0.2);os.start(actx.currentTime+o);os.stop(actx.currentTime+o+0.21)})}catch(e){}if(navigator.vibrate)navigator.vibrate([200,100,200])}
+function showT(){$('#tnum').textContent=Math.floor(tLeft/60)+':'+String(tLeft%60).padStart(2,'0')}
+let tEnd=0;
+function startTimer(s,n){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();actx.resume()}catch(e){}tEnd=Date.now()+s*1000;tLeft=s;$('#tname').textContent='Rest · '+n;$('#timer').classList.add('open');showT();clearInterval(tInt);tInt=setInterval(()=>{tLeft=Math.max(0,Math.round((tEnd-Date.now())/1000));showT();if(tLeft<=0){clearInterval(tInt);beep();$('#tnum').textContent='GO';setTimeout(()=>$('#timer').classList.remove('open'),1500)}},250)}
+$('#tplus').onclick=()=>{tEnd+=15000};$('#tminus').onclick=()=>{tEnd-=15000};
+$('#tstop').onclick=()=>{clearInterval(tInt);$('#timer').classList.remove('open')};
+function e1rm(l){if(!l||!l.reps)return 0;return (+l.kg||0)*(1+(+l.reps)/30)}
+function rProgress(){
+  let h='<p class="muted" style="margin:0 2px 10px">Your logged sets each week. Green = beat the week before. "Best" is an estimated 1-rep max.</p>';
+  DAYS.filter(d=>!d.cond).forEach(D=>{h+=`<div class="card"><h2 style="color:${D.color};margin-top:0">${D.name} · ${D.focus}</h2><table><tr><th style="text-align:left">Exercise</th><th>W1</th><th>W2</th><th>W3</th><th>W4</th><th>W5</th><th>Best</th></tr>`;
+    D.ex.forEach(e=>{h+=`<tr><td style="text-align:left;font-weight:600">${e.code} ${e.name.replace(/\s*\(.*\)/,'')}</td>`;let best=0;
+      for(let w=1;w<=5;w++){const l=log(e.id,w);const c=w>1?cmp(l,prevLog(e.id,w)):0;best=Math.max(best,e1rm(l));h+=`<td class="${c>0?'g':c<0?'r':''}">${l&&l.reps?(+l.kg?(+l.kg):'BW')+'×'+l.reps:'–'}</td>`}
+      h+=`<td><b>${best?Math.round(best):'–'}</b></td></tr>`});h+='</table></div>'});
+  $('#main').innerHTML=h;
+}
+let tDate=iso(new Date());
+function avg(a){a=a.filter(x=>x!==''&&x!=null&&!isNaN(x)).map(Number);return a.length?a.reduce((x,y)=>x+y,0)/a.length:null}
+function rTracker(){
+  const d=S.daily[tDate]||{},T=S.targets;
+  const plan=['Rest','Upper A','Lower A','Rest','Upper B','Lower B','Conditioning'][parse(tDate).getDay()];
+  const st=(v,t)=>v===''||v==null?'':(+v>=t?'good':'bad');
+  let h=`<div class="card"><div class="row"><label>Date</label><input type="date" id="td" value="${tDate}"></div><p class="muted" style="margin:8px 0 0">Planned: <b>${plan}</b></p>
+  <div class="seg" id="sess">${['Done','Partial','Missed','Rest'].map(x=>`<button class="${d.session===x?'on':''}">${x}</button>`).join('')}</div>
+  <div class="inputs"><div class="field"><label>Weight kg</label><input inputmode="decimal" data-k="weight" value="${d.weight??''}"></div><div class="field"><label>Protein g</label><input inputmode="numeric" data-k="protein" class="${st(d.protein,T.protein)}" value="${d.protein??''}"></div></div>
+  <div class="inputs"><div class="field"><label>Water L</label><input inputmode="decimal" data-k="water" class="${st(d.water,T.water)}" value="${d.water??''}"></div><div class="field"><label>Sleep h</label><input inputmode="decimal" data-k="sleep" class="${st(d.sleep,T.sleep)}" value="${d.sleep??''}"></div></div>
+  <div class="row"><input type="text" data-k="notes" placeholder="Notes (energy, heat, soreness…)" value="${(d.notes??'').replace(/"/g,'&quot;')}"></div></div>`;
+  // weight series last 42 days from start
+  const start=parse(S.start),pts=[];for(let i=0;i<42;i++){const dt=new Date(start);dt.setDate(dt.getDate()+i);const k=iso(dt);const v=S.daily[k]&&S.daily[k].weight;pts.push(v!==''&&v!=null?+v:null)}
+  const ma=pts.map((_,i)=>avg(pts.slice(Math.max(0,i-6),i+1)));
+  const vals=pts.filter(x=>x!=null);
+  h+=`<div class="card"><h2 style="margin-top:0">Bodyweight</h2>`;
+  if(vals.length<2)h+='<p class="muted">Log your weight each morning – the chart and 7-day average appear here.</p>';
+  else{const lo=Math.min(...vals)-0.5,hi=Math.max(...vals)+0.5,W=320,H=150,x=i=>10+i*(W-20)/41,y=v=>H-15-(v-lo)/(hi-lo)*(H-30);
+    let s=`<svg class="chart" viewBox="0 0 ${W} ${H}"><line x1="10" x2="${W-10}" y1="${H-15}" y2="${H-15}" stroke="#E5DAE0"/>`;
+    for(let w=1;w<6;w++)s+=`<line x1="${x(w*7)}" x2="${x(w*7)}" y1="5" y2="${H-15}" stroke="#F0E8EC"/>`;
+    pts.forEach((v,i)=>{if(v!=null)s+=`<circle cx="${x(i)}" cy="${y(v)}" r="2.6" fill="#C9A3B8"/>`});
+    let path='';ma.forEach((v,i)=>{if(v!=null&&pts.slice(0,i+1).some(z=>z!=null))path+=(path?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)});
+    s+=`<path d="${path}" fill="none" stroke="#7A2E58" stroke-width="2.5" stroke-linejoin="round"/><text x="12" y="12" font-size="10" fill="#6B5A64">${hi.toFixed(1)}</text><text x="12" y="${H-19}" font-size="10" fill="#6B5A64">${lo.toFixed(1)}</text></svg>`;
+    h+=s+'<p class="muted" style="margin:4px 0 0">Dots = daily weigh-ins · line = 7-day average</p>'}
+  h+='</div>';
+  // weekly summary
+  h+=`<div class="card"><h2 style="margin-top:0">Weekly summary</h2><table><tr><th>Wk</th><th>Avg kg</th><th>Change</th><th>Sessions</th><th>Protein</th><th>Water</th><th>Sleep</th></tr>`;let prev=null;
+  for(let w=0;w<6;w++){const days=[];for(let i=0;i<7;i++){const dt=new Date(start);dt.setDate(dt.getDate()+w*7+i);days.push(S.daily[iso(dt)]||{})}
+    const a=avg(days.map(x=>x.weight)),ch=a!=null&&prev!=null?a-prev:null;
+    const cc=ch==null?'':(ch<=-0.2&&ch>=-0.9?'g':'r');
+    h+=`<tr><td><b>${w===5?'DL':w+1}</b></td><td>${a!=null?a.toFixed(1):'–'}</td><td class="${cc}">${ch!=null?(ch>0?'+':'')+ch.toFixed(1):'–'}</td><td>${days.filter(x=>x.session==='Done').length}/4</td>
+    <td class="${avg(days.map(x=>x.protein))>=T.protein?'g':''}">${avg(days.map(x=>x.protein))?.toFixed(0)??'–'}</td><td>${avg(days.map(x=>x.water))?.toFixed(1)??'–'}</td><td>${avg(days.map(x=>x.sleep))?.toFixed(1)??'–'}</td></tr>`;if(a!=null)prev=a}
+  h+='</table><p class="muted" style="margin:8px 0 0">Cutting target: lose 0.2–0.9 kg/week (green). Otherwise adjust calories by ~200/day.</p></div>';
+  $('#main').innerHTML=h;
+  $('#td').onchange=e=>{tDate=e.target.value||iso(new Date());rTracker()};
+  const upd=(k,v)=>{S.daily[tDate]=S.daily[tDate]||{};S.daily[tDate][k]=v;save()};
+  document.querySelectorAll('#sess button').forEach(b=>b.onclick=()=>{upd('session',b.textContent);rTracker();toast('Saved')});
+  document.querySelectorAll('[data-k]').forEach(i=>{i.addEventListener('input',()=>upd(i.dataset.k,i.value.replace(',','.')));i.addEventListener('change',()=>{const y=scrollY;rTracker();scrollTo(0,y);toast('Saved')})});
+}
+function rSettings(){
+  const T=S.targets;
+  let h=`<div class="card"><h2 style="margin-top:0">Program</h2><div class="row"><label>Week 1 starts</label><input type="date" id="sd" value="${S.start}"></div>
+  <div class="row"><label>Current week</label><select id="wo"><option value="">Automatic (from start date)</option>${[1,2,3,4,5,6].map(w=>`<option ${S.weekOverride==w?'selected':''} value="${w}">Week ${w}${w===6?' (deload)':''}</option>`).join('')}</select></div></div>
+  <div class="card"><h2 style="margin-top:0">Daily targets</h2><div class="row"><label>Protein g</label><input inputmode="numeric" id="tp" value="${T.protein}"></div><div class="row"><label>Water L</label><input inputmode="decimal" id="tw" value="${T.water}"></div><div class="row"><label>Sleep h</label><input inputmode="decimal" id="ts" value="${T.sleep}"></div></div>
+  <div class="card"><h2 style="margin-top:0">Backup</h2><p class="muted" style="margin-top:0">Your data lives only on this phone. Save a backup now and then (e.g. to Files or email it to yourself).</p>
+  <div class="btns"><button class="btn primary" id="exp">Save backup</button><button class="btn" id="imp">Restore backup</button></div><input type="file" id="impf" accept=".json,application/json" style="display:none"></div>
+  <div class="card"><h2 style="margin-top:0">How it works</h2><p class="muted" style="margin:0">Log the weight and the reps of your <b>lowest</b> set. When that hits the top of the rep range, the app tells you to go up. Last set 0–1 reps from failure, other sets 1–2 in reserve. Week 6 is a deload.</p></div>
+  <div class="card"><button class="btn" id="rst" style="width:100%;color:#A3132A">Start a new block (clear workout logs)</button></div>
+  <p class="muted" style="text-align:center">Works offline once added to your Home Screen.</p>`;
+  $('#main').innerHTML=h;
+  $('#sd').onchange=e=>{if(e.target.value){S.start=e.target.value;save();week=S.weekOverride||autoWeek();header();toast('Saved')}};
+  $('#wo').onchange=e=>{S.weekOverride=e.target.value?+e.target.value:null;save();week=S.weekOverride||autoWeek();header();toast('Saved')};
+  [['tp','protein'],['tw','water'],['ts','sleep']].forEach(([id,k])=>$('#'+id).onchange=e=>{S.targets[k]=+e.target.value||S.targets[k];save();toast('Saved')});
+  $('#exp').onclick=async()=>{const txt=JSON.stringify(S),name='juzzy-backup-'+iso(new Date())+'.json';
+    try{const f=new File([txt],name,{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:name});return}}catch(e){if(e.name==='AbortError')return}
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download=name;a.click();toast('Backup saved')};
+  $('#imp').onclick=()=>$('#impf').click();
+  $('#impf').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{const o=JSON.parse(t);if(!o.logs||!o.daily)throw 0;S=o;save();week=S.weekOverride||autoWeek();render();toast('Backup restored')}catch(_){toast('That file is not a valid backup')}})};
+  $('#rst').onclick=()=>{if(confirm('Clear all workout logs and start a new 6-week block from today? (Daily tracker entries are kept.) Save a backup first if unsure.')){S.logs={};S.start=iso(new Date());S.weekOverride=null;save();week=autoWeek();render();toast('New block started')}};
+}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;render();scrollTo(0,0)});
+$('#wkm').onclick=()=>{week=Math.max(1,week-1);render()};$('#wkp').onclick=()=>{week=Math.min(6,week+1);render()};
+render();
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
