@@ -148,13 +148,13 @@ input[type=range]{width:100%;accent-color:var(--acc)}
 .dayhead em.done{display:inline-block;font-style:normal;font-weight:800;font-size:12.5px;background:#16A34A;color:#fff;border-radius:12px;padding:3px 10px;margin-left:10px;vertical-align:4px}
 .dayhead:not(.retro) em.done{float:right;margin:2px 0 0}
 #sbar{position:fixed;left:50%;transform:translateX(-50%) translateY(20px);bottom:calc(66px + env(safe-area-inset-bottom));z-index:30;display:flex;align-items:center;gap:10px;background:#0F1B2D;color:#fff;border-radius:26px;padding:7px 8px 7px 14px;box-shadow:0 6px 18px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:.25s;white-space:nowrap}
-#sbar.on{opacity:1;pointer-events:auto;transform:translateX(-50%)}
+#sbar.on{display:none}
 #sbar .dot{width:9px;height:9px;border-radius:50%;background:#EF4444;animation:pulse 1.2s infinite}
 @keyframes pulse{50%{opacity:.3}}
 #sbar b{font-size:14px;cursor:pointer}#sbt{font-variant-numeric:tabular-nums;font-weight:800;font-size:16px;min-width:56px}
 #sbfin{border:0;background:#16A34A;color:#fff;font-weight:800;border-radius:18px;padding:7px 14px;font-size:14px}
 #sbx{border:0;background:rgba(255,255,255,.12);color:#fff;border-radius:50%;width:28px;height:28px;font-size:12px}
-body.sess main{padding-bottom:calc(140px + env(safe-area-inset-bottom))}
+
 .fincard{text-align:center;padding:18px 14px}
 .fincard .bigt{font-size:40px;font-weight:800;font-variant-numeric:tabular-nums;margin:4px 0 10px}
 .fincard .btn{width:100%;padding:14px;font-size:16px}
@@ -163,6 +163,17 @@ body.sess main{padding-bottom:calc(140px + env(safe-area-inset-bottom))}
 .lnk{border:0;background:none;color:var(--sub);text-decoration:underline;font-size:13px;margin-top:10px}
 .absv{display:flex;gap:6px;margin-bottom:12px}.absv button{flex:1;border:2px solid var(--line);background:var(--inbg);color:var(--sub);border-radius:10px;padding:9px 4px;font-weight:700;font-size:13px}.absv button.on{border-color:var(--acc);background:var(--acc);color:#fff}
 .chip small{font-size:10px;opacity:.75;font-weight:700;text-transform:uppercase}
+.sets{margin-top:10px}
+.sh,.sr{display:grid;grid-template-columns:30px 1fr 1fr 74px;gap:6px;align-items:center}
+.sh span{font-size:10.5px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;text-align:center}
+.sr{margin-top:6px}.sn{width:26px;height:26px;border-radius:50%;background:var(--tint);color:var(--acctext,var(--acc));font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center}
+.sr input{width:100%;font-size:18px;font-weight:700;padding:8px;text-align:center;border:2px solid var(--line);border-radius:10px;background:var(--inbg);color:var(--ink);-webkit-appearance:none}
+.sr input:focus{outline:none;border-color:var(--acc2)}.sr input.good{border-color:var(--good);background:var(--goodbg)}.sr input.bad{border-color:var(--bad);background:var(--badbg)}
+.ps{font-size:12px;color:var(--sub);text-align:center}
+.vol{margin-top:8px;font-size:13px;color:var(--sub);text-align:right}.vol b{color:var(--ink)}.vol .up{color:var(--good);font-weight:800}.vol .dn{color:var(--bad);font-weight:800}
+.fincard .up{color:var(--good);font-weight:700}.fincard .dn{color:var(--bad);font-weight:700}
+tr.volrow td{font-weight:800;border-top:2px solid var(--line)}
+.pnotes{margin-top:6px;border-left:3px solid var(--line);padding:2px 0 2px 10px}.pnotes div{font-size:13px;color:var(--sub);margin:3px 0;white-space:pre-wrap}.pnotes b{color:var(--ink);font-size:12px;margin-right:4px}
 .saved{font-size:12px;color:var(--good);font-weight:700;margin-left:auto;opacity:0;transition:opacity .3s}
 .saved.show{opacity:1}
 </style>
@@ -376,7 +387,23 @@ function shrink(file){return new Promise((res,rej)=>{const u=URL.createObjectURL
 function pickWall(){if(!WALLS.length)return null;if(S.wallMode==='fixed'&&S.wallFixed){const f=WALLS.find(w=>w.id===S.wallFixed);if(f)return f}const d=new Date(),n=Math.floor(d/864e5)+day;return WALLS[n%WALLS.length]}
 function applyWall(){const w=pickWall(),el=document.getElementById('wall');if(!el)return;if(w&&S.wallOn!==false){el.style.backgroundImage=`url(${w.data})`;document.body.classList.add('haswall');document.documentElement.style.setProperty('--wallop',(S.wallOp??22)/100)}else{el.style.backgroundImage='';document.body.classList.remove('haswall')}}
 WDB.all().then(a=>{USERWALLS=a.sort((x,y)=>x.id-y.id);setWalls();applyWall()}).catch(()=>{applyWall()});
-function exDone(e,w){const l=log(e.id,w);return !!(l&&l.reps!==''&&l.reps!=null)}
+function escN(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+function pastNotes(id,w){const W=(S.wnotes||{})[id]||{};let rows=[];for(let k=6;k>=1;k--){if(k!==w&&W[k]&&W[k].trim())rows.push(`<div><b>${k===6?'Deload':'Wk '+k}</b> ${escN(W[k])}</div>`)}
+  const g=(S.notes||{})[id];if(g&&g.trim())rows.push(`<div><b>Earlier</b> ${escN(g)}</div>`);return rows.length?`<div class="pnotes">${rows.join('')}</div>`:''}
+function nSets(e,w){return w===6?Math.ceil(e.sets/2):e.sets}
+function filled(L){return ((L&&L.sets)||[]).filter(x=>x&&x.reps!==''&&x.reps!=null)}
+function summarize(L){const s=filled(L);if(!s.length){L.kg='';L.reps='';return}const mk=Math.max(...s.map(x=>+x.kg||0));L.kg=String(mk);L.reps=String(Math.min(...s.filter(x=>(+x.kg||0)===mk).map(x=>+x.reps)))}
+function vol(L,e){if(!L)return 0;if(L.sets)return filled(L).reduce((a,x)=>a+(+x.kg||0)*(+x.reps||0),0);return L.reps?(+L.kg||0)*(+L.reps||0)*(e?e.sets:1):0}
+function reps(L,e){if(!L)return 0;if(L.sets)return filled(L).reduce((a,x)=>a+(+x.reps||0),0);return L.reps?(+L.reps)*(e?e.sets:1):0}
+function prevSet(id,w,i){for(let k=Math.min(w-1,5);k>=1;k--){const l=log(id,k);if(l&&l.sets&&l.sets[i]&&l.sets[i].reps)return l.sets[i];if(l&&!l.sets&&l.reps)return {kg:l.kg,reps:l.reps}}return null}
+function prevWeekLog(id,w){for(let k=Math.min(w-1,5);k>=1;k--){const l=log(id,k);if(l&&(filled(l).length||l.reps))return {l,w:k}}return null}
+function nf(x){return Math.round(x).toLocaleString()}
+function volLine(e,w){const L=log(e.id,w),pv=prevWeekLog(e.id,w);const hasKg=x=>!!x&&(filled(x).some(s=>+s.kg>0)||+x.kg>0);const bw=!hasKg(L)&&!(pv&&hasKg(pv.l));
+  const cur=bw?reps(L,e):vol(L,e),pre=pv?(bw?reps(pv.l,e):vol(pv.l,e)):0,u=bw?' reps':' kg';
+  if(!cur&&!pre)return '';let d='';if(cur&&pre){const pc=Math.round((cur-pre)/pre*100);d=` <span class="${pc>0?'up':pc<0?'dn':''}">${pc>0?'▲ +':pc<0?'▼ ':''}${pc}%</span>`}
+  return `<b>${bw?'Total':'Volume'}: ${cur?nf(cur)+u:'–'}</b>${pre?` · wk ${pv.w}: ${nf(pre)}${u}`:''}${d}`}
+function dayVol(di,w){return DAYS[di].ex.map(exFor).reduce((a,e)=>a+vol(log(e.id,w),e),0)}
+function exDone(e,w){const l=log(e.id,w);if(!l)return false;if(l.sets)return filled(l).length>=nSets(e,w);return !!(l.reps!==''&&l.reps!=null)}
 function dayDone(i,w){const D=DAYS[i];if(!D||D.cond||!D.ex.length)return false;return D.ex.map(exFor).every(e=>exDone(e,w))}
 function weekDone(w){return DAYS.every((D,i)=>D.cond||D.optional||dayDone(i,w))}
 const TICK='<span class="tick" aria-label="complete">✓</span>';
@@ -391,7 +418,7 @@ function finishSession(){const a=S.active;if(!a)return;let ms=Date.now()-a.start
   if(ms>3*3600e3){const v=prompt('The timer has been running for '+fmtDur(ms)+'. How many minutes did you actually train?','60');if(v===null)return;ms=(+v||60)*60e3}
   const D=DAYS[a.day],mins=ms/60e3,date=iso(new Date(a.start));
   const done=D.ex.map(exFor).filter(e=>exDone(e,a.week)).length;
-  S.sessions=S.sessions||[];S.sessions.push({date,day:a.day,dayName:D.name,week:a.week,start:a.start,end:a.start+ms,mins:Math.round(mins),done,total:D.ex.length});
+  S.sessions=S.sessions||[];S.sessions.push({date,day:a.day,dayName:D.name,week:a.week,start:a.start,end:a.start+ms,mins:Math.round(mins),done,total:D.ex.length,vol:Math.round(dayVol(a.day,a.week))});
   S.daily[date]=S.daily[date]||{};S.daily[date].session='Done';S.daily[date].trainMins=(+S.daily[date].trainMins||0)+Math.round(mins);
   S.active=null;save();paintSess();render();toast('Workout logged: '+fmtMin(mins))}
 function cancelSession(){if(confirm('Discard the running workout timer?')){S.active=null;save();paintSess();render()}}
@@ -415,23 +442,28 @@ function rWorkout(){
     h+=`<div class="card ex" id="c-${e.id}"><div class="top"><div class="badge" style="background:${dcol(day)}">${e.code}</div><button class="edit" data-edit="${e.slot}" aria-label="Change exercise">Edit</button><div style="flex:1"><h3>${e.name}${exDone(e,week)?' '+TICK:''}</h3>${e.swapped?`<div class="swp">Swapped in for ${e.orig}</div>`:''}<div class="meta">${week===6?Math.ceil(e.sets/2):e.sets} sets × ${e.min}–${e.max} reps · rest ${e.rest?e.rest+'s':'none (superset)'}</div></div></div>
     ${e.note?`<div class="note">${e.note}</div>`:''}
     <div class="target ${t.cls}">${t.html}</div>
-    <div class="inputs"><div class="field"><label>kg (0 = bodyweight)</label><input inputmode="decimal" data-id="${e.id}" data-f="kg" value="${l.kg??''}" class="${cls}" placeholder="${p?(p.kg??''):''}"></div>
-    <div class="field"><label>Reps (lowest set)</label><input inputmode="numeric" data-id="${e.id}" data-f="reps" value="${l.reps??''}" class="${cls}" placeholder="${e.min}–${e.max}"></div></div>
+    <div class="sets"><div class="sh"><span>Set</span><span>kg</span><span>Reps</span><span>Last time</span></div>${Array.from({length:nSets(e,week)},(_,i)=>{const S0=((l.sets||[])[i])||{},ps=prevSet(e.id,week,i),legacy=!l.sets&&i===0&&l.reps?l:null;const kv=S0.kg??(legacy?legacy.kg:''),rv=S0.reps??(legacy?legacy.reps:'');
+      const g=ps&&rv!==''&&rv!=null&&week<6?((+kv||0)>(+ps.kg||0)||((+kv||0)===(+ps.kg||0)&&+rv>+ps.reps)?'good':((+kv||0)<(+ps.kg||0)||((+kv||0)===(+ps.kg||0)&&+rv<+ps.reps)?'bad':'')):'';
+      return `<div class="sr"><span class="sn">${i+1}</span><input inputmode="decimal" data-id="${e.id}" data-s="${i}" data-f="kg" value="${kv??''}" class="${g}" placeholder="${ps?(ps.kg??''):'kg'}"><input inputmode="numeric" data-id="${e.id}" data-s="${i}" data-f="reps" value="${rv??''}" class="${g}" placeholder="${ps?ps.reps:e.min+'–'+e.max}"><span class="ps">${ps?fmt(ps.kg).replace(' kg','')+' × '+ps.reps:'–'}</span></div>`}).join('')}
+    <div class="vol" id="v-${e.id}">${volLine(e,week)}</div></div>
     <div class="btns"><button class="btn" data-how="${e.id}">How to</button>${e.rest?`<button class="btn primary" data-rest="${e.rest}" data-n="${e.name}">Rest ${e.rest}s</button>`:''}</div>
     <div class="how" id="h-${e.id}">${e.img?`<img loading="lazy" src="img/${e.img}.jpg" alt="${e.name}">`:'<p class="muted">No picture for this one yet – follow the cues below.</p>'}<p class="mus">Works: ${e.mus}</p><p>${e.cue}</p></div>
     <div class="hist">${hist}</div>
-    <textarea class="exnote" rows="1" data-note="${e.id}" placeholder="Notes – seat setting, grip, how it felt…">${((S.notes||{})[e.id]||'').replace(/</g,'&lt;')}</textarea></div>`});
+    <textarea class="exnote" rows="1" data-note="${e.id}" placeholder="Week ${week} notes – seat setting, grip, how it felt…">${(((S.wnotes||{})[e.id]||{})[week]||'').replace(/</g,'&lt;')}</textarea>${pastNotes(e.id,week)}</div>`});
   {const ts=todaySession(day),act=S.active&&S.active.day===day,other=S.active&&S.active.day!==day;
-   if(act)h+=`<div class="card fincard"><div class="muted">Workout time</div><div class="bigt" id="ffin">${fmtDur(Date.now()-S.active.start)}</div><button class="btn finish" id="finbtn">✓ Finish workout</button><button class="lnk" id="canbtn">Discard timer</button></div>`;
-   else if(ts)h+=`<div class="card fincard done"><div class="bigt">✓ ${fmtMin(ts.mins)}</div><div class="muted">${ts.dayName} done today · ${ts.done}/${ts.total} exercises logged</div><button class="lnk" id="resbtn">Resume timer</button></div>`;
+   if(act)h+=`<div class="card fincard"><div class="muted">Workout time</div><div class="bigt" id="ffin">${fmtDur(Date.now()-S.active.start)}</div><div class="muted" style="margin:-6px 0 12px">Lifted so far: <b id="svol">${nf(dayVol(day,week))} kg</b></div><button class="btn finish" id="finbtn">✓ Finish workout</button><button class="lnk" id="canbtn">Discard timer</button></div>`;
+   else if(ts)h+=`<div class="card fincard done"><div class="bigt">✓ ${fmtMin(ts.mins)}</div><div class="muted">${ts.dayName} done today · ${ts.done}/${ts.total} exercises logged${ts.vol?` · <b>${nf(ts.vol)} kg</b> lifted`:''}${(()=>{const pv=(S.sessions||[]).filter(s=>s.day===ts.day&&s.start<ts.start&&s.vol).sort((a,b)=>b.start-a.start)[0];if(!pv||!ts.vol)return '';const pc=Math.round((ts.vol-pv.vol)/pv.vol*100);return ` <span class="${pc>=0?'up':'dn'}">(${pc>=0?'+':''}${pc}% vs last time)</span>`})()}</div><button class="lnk" id="resbtn">Resume timer</button></div>`;
    else if(!other)h+=`<div class="card fincard"><div class="muted">The timer starts automatically when you log your first set.</div><button class="btn" id="stbtn">▶ Start workout timer now</button></div>`;}
   if(D.finisher)h+=`<div class="banner wu" style="border-left-color:#16A34A"><b>Finisher:</b> ${D.finisher.replace(/^Optional finisher \(10 min\): /,'')}</div>`;
   m.innerHTML=h;
   m.querySelectorAll('[data-absv]').forEach(b=>b.onclick=()=>{S.absV=+b.dataset.absv;save();rWorkout();header()});
   if($('#finbtn'))$('#finbtn').onclick=finishSession;if($('#canbtn'))$('#canbtn').onclick=cancelSession;if($('#stbtn'))$('#stbtn').onclick=()=>startSession();if($('#resbtn'))$('#resbtn').onclick=()=>resumeLast(day);
-  m.querySelectorAll('input[data-id]').forEach(i=>i.addEventListener('input',ev=>{const id=i.dataset.id;S.logs[id]=S.logs[id]||{};const L=S.logs[id][week]=S.logs[id][week]||{};L[i.dataset.f]=i.value.trim()===''?'':i.value.replace(',','.');if(i.value.trim()!=='')autoStart();save()}));
+  const exById={};D.ex.map(exFor).forEach(e=>exById[e.id]=e);
+  const setVal=(id,s,f,v)=>{S.logs[id]=S.logs[id]||{};const L=S.logs[id][week]=S.logs[id][week]||{};if(!L.sets){L.sets=[];if(L.reps){L.sets[0]={kg:L.kg,reps:L.reps}}}while(L.sets.length<=s)L.sets.push({kg:'',reps:''});L.sets[s]=L.sets[s]||{kg:'',reps:''};L.sets[s][f]=v;summarize(L);return L};
+  m.querySelectorAll('input[data-id]').forEach(i=>i.addEventListener('input',()=>{const id=i.dataset.id,v=i.value.trim()===''?'':i.value.replace(',','.');setVal(id,+i.dataset.s,i.dataset.f,v);if(v!=='')autoStart();save();const vl=$('#v-'+id);if(vl)vl.innerHTML=volLine(exById[id],week);const ft=$('#svol');if(ft)ft.textContent=nf(dayVol(day,week))+' kg'}));
+  m.querySelectorAll('input[data-f=kg]').forEach(i=>i.addEventListener('change',()=>{if(i.value.trim()==='')return;const id=i.dataset.id,s=+i.dataset.s;m.querySelectorAll(`input[data-id="${id}"][data-f=kg]`).forEach(o=>{if(+o.dataset.s>s&&o.value.trim()===''){o.value=i.value;setVal(id,+o.dataset.s,'kg',i.value.replace(',','.'))}});save()}));
   m.querySelectorAll('input[data-id]').forEach(i=>i.addEventListener('change',()=>{toast('Saved');dirty=true;soft()}));
-  m.querySelectorAll('[data-note]').forEach(t=>{const fit=()=>{t.style.height='auto';t.style.height=t.scrollHeight+'px'};fit();t.addEventListener('input',()=>{S.notes=S.notes||{};S.notes[t.dataset.note]=t.value;save();fit()});t.addEventListener('change',()=>toast('Note saved'))});
+  m.querySelectorAll('[data-note]').forEach(t=>{const fit=()=>{t.style.height='auto';t.style.height=t.scrollHeight+'px'};fit();t.addEventListener('input',()=>{S.wnotes=S.wnotes||{};const id=t.dataset.note;S.wnotes[id]=S.wnotes[id]||{};S.wnotes[id][week]=t.value;save();fit()});t.addEventListener('change',()=>toast('Note saved'))});
   m.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openPicker(b.dataset.edit));
   m.querySelectorAll('[data-how]').forEach(b=>b.onclick=()=>{const el=$('#h-'+b.dataset.how);el.classList.toggle('open');b.textContent=el.classList.contains('open')?'Hide':'How to'});
   m.querySelectorAll('[data-rest]').forEach(b=>b.onclick=()=>startTimer(+b.dataset.rest,b.dataset.n));
@@ -449,12 +481,12 @@ function rProgress(){
   const SS=(S.sessions||[]).slice().sort((a,b)=>b.start-a.start);let h='';
   if(SS.length){const wk=w=>SS.filter(s=>s.week===w);const cur=wk(week),tot=cur.reduce((a,b)=>a+b.mins,0),avgm=SS.reduce((a,b)=>a+b.mins,0)/SS.length;
     h+=`<div class="card"><h2 style="margin-top:0">Training time</h2><div class="grid2"><div class="stat"><small>Week ${week} total</small><b>${fmtMin(tot)}</b><div class="muted">${cur.length} session${cur.length===1?'':'s'}</div></div><div class="stat"><small>Average session</small><b>${fmtMin(avgm)}</b><div class="muted">${SS.length} logged</div></div></div>
-    <table style="margin-top:10px"><tr><th style="text-align:left">Date</th><th style="text-align:left">Workout</th><th>Time</th><th>Done</th></tr>${SS.slice(0,10).map(s=>`<tr><td style="text-align:left">${parse(s.date).toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'})}</td><td style="text-align:left;font-weight:600">${s.dayName}</td><td><b>${fmtMin(s.mins)}</b></td><td>${s.done}/${s.total}</td></tr>`).join('')}</table></div>`}
+    <table style="margin-top:10px"><tr><th style="text-align:left">Date</th><th style="text-align:left">Workout</th><th>Time</th><th>Volume</th></tr>${SS.slice(0,10).map(s=>`<tr><td style="text-align:left">${parse(s.date).toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'})}</td><td style="text-align:left;font-weight:600">${s.dayName}</td><td><b>${fmtMin(s.mins)}</b></td><td>${s.vol?nf(s.vol)+' kg':'–'}</td></tr>`).join('')}</table></div>`}
   h+='<p class="muted" style="margin:0 2px 10px">Your logged sets each week. Green = beat the week before. "Best" is an estimated 1-rep max.</p>';
   DAYS.filter(d=>!d.cond).forEach((D,di)=>{h+=`<div class="card"><h2 style="color:${dcol(di)};margin-top:0">${D.name} · ${D.focus}</h2><table><tr><th style="text-align:left">Exercise</th><th>W1</th><th>W2</th><th>W3</th><th>W4</th><th>W5</th><th>Best</th></tr>`;
     D.ex.map(exFor).forEach(e=>{h+=`<tr><td style="text-align:left;font-weight:600">${e.code} ${e.name.replace(/\s*\(.*\)/,'')}</td>`;let best=0;
       for(let w=1;w<=5;w++){const l=log(e.id,w);const c=w>1?cmp(l,prevLog(e.id,w)):0;best=Math.max(best,e1rm(l));h+=`<td class="${c>0?'g':c<0?'r':''}">${l&&l.reps?(+l.kg?(+l.kg):'BW')+'×'+l.reps:'–'}</td>`}
-      h+=`<td><b>${best?Math.round(best):'–'}</b></td></tr>`});h+='</table></div>'});
+      h+=`<td><b>${best?Math.round(best):'–'}</b></td></tr>`});h+=`<tr class="volrow"><td style="text-align:left">Total volume (kg)</td>${[1,2,3,4,5].map(w=>{const v=dayVol(di,w),pv=w>1?dayVol(di,w-1):0;return `<td class="${v&&pv?(v>pv?'g':v<pv?'r':''):''}">${v?(v>=1000?(v/1000).toFixed(1)+'k':Math.round(v)):'–'}</td>`}).join('')}<td></td></tr>`;h+='</table></div>'});
   const valid=new Set(DAYS.flatMap(d=>d.ex.map(exFor).map(e=>e.id)));const orph=Object.keys(S.logs).filter(k=>!valid.has(k)&&Object.values(S.logs[k]).some(v=>v&&v.reps));
   if(orph.length){h+=`<div class="card"><h2 style="margin-top:0">Older exercises</h2><p class="muted" style="margin-top:0">Exercises you've logged that aren't in the plan right now – kept so nothing is lost.</p><table>`;orph.forEach(k=>{h+=`<tr><td style="text-align:left;font-weight:600">${exName(MIG[k]&&!LIBM[k]?MIG[k]:k).replace(/^./,c=>c.toUpperCase())}</td>`;for(let w=1;w<=6;w++){const l=S.logs[k][w];h+=`<td>${l&&l.reps?(+l.kg?(+l.kg):'BW')+'×'+l.reps:'–'}</td>`}h+='</tr>'});h+='</table></div>'}
   $('#main').innerHTML=h;

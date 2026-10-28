@@ -1,4 +1,4 @@
-const C='juzzytrain-v22';
+const C='juzzytrain-v24';
 const A=["./", "index.html", "manifest.json", "icon-180.png", "icon-192.png", "icon-512.png", "img/ab_wheel.jpg", "img/bulgarian.jpg", "img/cable_crunch.jpg", "img/cable_fly.jpg", "img/cable_row.jpg", "img/calf_seated.jpg", "img/calf_stand.jpg", "img/curl.jpg", "img/db_row.jpg", "img/dead_bug.jpg", "img/deadlift.jpg", "img/face_pull.jpg", "img/farmer.jpg", "img/flat_press_bb.jpg", "img/flat_press_db.jpg", "img/hanging_raise.jpg", "img/hip_thrust.jpg", "img/incline_curl.jpg", "img/incline_press.jpg", "img/lat_pulldown.jpg", "img/lateral_raise.jpg", "img/leg_curl.jpg", "img/leg_ext.jpg", "img/leg_press.jpg", "img/lunge.jpg", "img/oh_triceps.jpg", "img/pallof.jpg", "img/plank.jpg", "img/pullup.jpg", "img/pushdown.jpg", "img/rdl.jpg", "img/rear_delt.jpg", "img/shoulder_press.jpg", "img/squat.jpg"];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(A)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C).map(x=>caches.delete(x)))).then(()=>self.clients.claim()))});
