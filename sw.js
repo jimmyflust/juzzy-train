@@ -1,5 +1,8 @@
-const C='juzzytrain-v27';
+const C='juzzytrain-v28';
 const A=["./", "index.html", "manifest.json", "icon-180.png", "icon-192.png", "icon-512.png", "img/ab_wheel.jpg", "img/bulgarian.jpg", "img/cable_crunch.jpg", "img/cable_fly.jpg", "img/cable_row.jpg", "img/calf_seated.jpg", "img/calf_stand.jpg", "img/curl.jpg", "img/db_row.jpg", "img/dead_bug.jpg", "img/deadlift.jpg", "img/face_pull.jpg", "img/farmer.jpg", "img/flat_press_bb.jpg", "img/flat_press_db.jpg", "img/hanging_raise.jpg", "img/hip_thrust.jpg", "img/incline_curl.jpg", "img/incline_press.jpg", "img/lat_pulldown.jpg", "img/lateral_raise.jpg", "img/leg_curl.jpg", "img/leg_ext.jpg", "img/leg_press.jpg", "img/lunge.jpg", "img/oh_triceps.jpg", "img/pallof.jpg", "img/plank.jpg", "img/pullup.jpg", "img/pushdown.jpg", "img/rdl.jpg", "img/rear_delt.jpg", "img/shoulder_press.jpg", "img/squat.jpg"];
-self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(A)).then(()=>self.skipWaiting()))});
+self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(A.map(u=>new Request(u,{cache:'reload'})))).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C).map(x=>caches.delete(x)))).then(()=>self.clients.claim()))});
-self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(caches.match(e.request,{ignoreSearch:true}).then(r=>r||fetch(e.request).then(res=>{const cp=res.clone();caches.open(C).then(c=>c.put(e.request,cp));return res}).catch(()=>caches.match('index.html'))))});
+self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);
+ const page=e.request.mode==='navigate'||u.pathname.endsWith('/')||u.pathname.endsWith('index.html');
+ if(page){e.respondWith(fetch(e.request,{cache:'no-store'}).then(res=>{const cp=res.clone();caches.open(C).then(c=>c.put('index.html',cp));return res}).catch(()=>caches.match('index.html')));return}
+ e.respondWith(caches.match(e.request,{ignoreSearch:true}).then(r=>r||fetch(e.request).then(res=>{const cp=res.clone();caches.open(C).then(c=>c.put(e.request,cp));return res}).catch(()=>caches.match('index.html'))))});

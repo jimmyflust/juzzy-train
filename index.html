@@ -593,7 +593,7 @@ function rSettings(){
   <div class="btns"><button class="btn primary" id="exp">Save backup</button><button class="btn" id="imp">Restore backup</button></div><input type="file" id="impf" accept=".json,application/json" style="display:none"></div>
   <div class="card"><h2 style="margin-top:0">How it works</h2><p class="muted" style="margin:0">Log the weight and the reps of your <b>lowest</b> set. When that hits the top of the rep range, the app tells you to go up. Last set 0–1 reps from failure, other sets 1–2 in reserve. Week 6 is a deload.</p></div>
   <div class="card"><button class="btn" id="rst" style="width:100%;color:var(--bad)">Start a new block (clear workout logs)</button></div>
-  <p class="muted" style="text-align:center">Juzzy Train · works offline once added to your Home Screen.</p>`;
+  <p class="muted" style="text-align:center">Juzzy Train <b>v28</b> · works offline once added to your Home Screen.</p>`;
   $('#main').innerHTML=h;
   document.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{S.theme=b.dataset.th;save();render();toast(THEMES[S.theme].label)});
   $('#wadd').onclick=()=>$('#wfile').click();
