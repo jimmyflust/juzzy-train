@@ -207,7 +207,7 @@ tr.prow td{font-size:11.5px;color:var(--sub);text-align:left;padding-top:0;borde
 </nav>
 <div id="timer"><div id="tman"></div><div id="tq"></div><div id="tname"></div><div id="tnum">0:00</div><div class="btns"><button class="btn" id="tminus">−15s</button><button class="btn" id="tplus">+15s</button><button class="btn" id="tstop">Done</button></div></div>
 <div id="picker"><div class="phead"><button class="pclose" id="pclose" aria-label="Close">✕</button><div><b id="ptitle">Change exercise</b><small id="psub"></small></div></div><div class="psearch"><input type="search" id="pq" placeholder="Search exercises…" autocomplete="off"></div><div id="plist"></div></div>
-<div id="cmp"><div class="cbox"><div class="ctick">✓</div><h2>Workout complete?</h2><div class="muted" id="cmpD"></div><div class="cbig" id="cmpT"></div><div id="cmpV" class="muted"></div><div id="cmpP" class="cparts"></div><button class="btn finish" id="cmpYes">✓ Finish & save workout</button><button class="lnk" id="cmpNo">Not yet – keep going</button></div></div>
+<div id="cmp"><div class="cbox"><div class="ctick">✓</div><h2 id="cmpH">Workout complete?</h2><div class="muted" id="cmpD"></div><div class="cbig" id="cmpT"></div><div id="cmpV" class="muted"></div><div id="cmpP" class="cparts"></div><button class="btn finish" id="cmpYes">✓ Finish & save workout</button><button class="lnk" id="cmpNo">Not yet – keep going</button></div></div>
 <div class="toast" id="toast"></div>
 <script>
 // ---- Offline food parser (estimates) ----
@@ -439,12 +439,12 @@ function startSession(quiet){if(S.active)return;S.active={day,week,start:Date.no
 function autoStart(){if(S.active&&S.active.block!==S.block)return;if(!S.active&&!todaySession(day))startSession(true)}
 function exParts(di,w,start,end){const items=DAYS[di].ex.map(exFor).map(e=>{const ts=filled(log(e.id,w)||{}).map(x=>x.t).filter(Boolean);return ts.length?{name:e.name.replace(/\s*\(.*\)/,''),code:e.code,first:Math.min(...ts),last:Math.max(...ts)}:null}).filter(Boolean).filter(x=>x.last>=start-60e3&&x.first<=end+60e3).sort((a,b)=>a.first-b.first);
   let prev=start;return items.map(x=>{const st=Math.min(prev,x.first),mins=Math.max(1,Math.round((x.last-st)/60e3));prev=x.last;return {code:x.code,name:x.name,mins}})}
-function checkComplete(){const a=S.active;if(!a||a.prompted||(a.block&&a.block!==S.block)||a.day!==day||a.week!==week)return;if(!dayDone(a.day,a.week))return;a.prompted=true;save();
+function checkComplete(){const a=S.active;if(!a||a.prompted||(a.block&&a.block!==S.block)||a.day!==day||a.week!==week)return;if(!dayDone(a.day,a.week))return;a.prompted=true;save();$('#cmpH').textContent="Workout complete?";
   const D=DAYS[a.day],ms=Date.now()-a.start;$('#cmpT').textContent=fmtDur(ms);$('#cmpD').textContent=D.name+' · Week '+(a.week===6?'6 (deload)':a.week);
   const v=dayVol(a.day,a.week);$('#cmpV').textContent=v?nf(v)+' kg lifted':'';
   $('#cmpP').innerHTML=exParts(a.day,a.week,a.start,Date.now()).map(p=>`<div><span>${p.code} ${p.name}</span><b>${p.mins} min</b></div>`).join('');
   $('#cmp').classList.add('open')}
-function finishSession(){const a=S.active;if(!a)return;if(a.block&&a.block!==S.block){switchBlock(a.block)}let ms=Date.now()-a.start;
+function finishSession(){const a=S.active;if(!a)return;if(a.block&&a.block!==S.block){switchBlock(a.block)}let ms=(a.endAt||Date.now())-a.start;
   if(ms>3*3600e3){const v=prompt('The timer has been running for '+fmtDur(ms)+'. How many minutes did you actually train?','60');if(v===null)return;ms=(+v||60)*60e3}
   const D=DAYS[a.day],mins=ms/60e3,date=iso(new Date(a.start));
   const done=D.ex.map(exFor).filter(e=>exDone(e,a.week)).length;
@@ -454,7 +454,7 @@ function finishSession(){const a=S.active;if(!a)return;if(a.block&&a.block!==S.b
 function cancelSession(){if(confirm('Discard the running workout timer?')){S.active=null;save();paintSess();render()}}
 function resumeLast(di){const d=iso(new Date());const i=(S.sessions||[]).findIndex(s=>s.date===d&&s.day===di);if(i<0)return;const s=S.sessions.splice(i,1)[0];if(S.daily[d]){S.daily[d].trainMins=Math.max(0,(+S.daily[d].trainMins||0)-s.mins)}S.active={day:s.day,week:s.week,start:s.start};save();paintSess();render();toast('Timer resumed')}
 function paintSess(){const el=$('#sbar');if(!el)return;if(!S.active){el.classList.remove('on');document.body.classList.remove('sess');return}
-  el.classList.add('on');document.body.classList.add('sess');const D=DAYS[S.active.day];
+  el.classList.add('on');document.body.classList.add('sess');const D=(S.active.block==='cali'?CALI:GYM)[S.active.day]||{name:'Workout'};
   $('#sbn').textContent=D.name;$('#sbt').textContent=fmtDur(Date.now()-S.active.start)}
 setInterval(()=>{if(S.active){const t=$('#sbt');if(t)t.textContent=fmtDur(Date.now()-S.active.start);const f=$('#ffin');if(f)f.textContent=fmtDur(Date.now()-S.active.start)}},1000);
 function render(){dirty=false;applyTheme();paintSess();try{applyWall()}catch(e){}header();({workout:rWorkout,progress:rProgress,tracker:rTracker,settings:rSettings})[tab]()}
@@ -492,7 +492,7 @@ function rWorkout(){
   if($('#finbtn'))$('#finbtn').onclick=finishSession;if($('#canbtn'))$('#canbtn').onclick=cancelSession;if($('#stbtn'))$('#stbtn').onclick=()=>startSession();if($('#resbtn'))$('#resbtn').onclick=()=>resumeLast(day);
   const exById={};D.ex.map(exFor).forEach(e=>exById[e.id]=e);
   const setVal=(id,s,f,v)=>{S.logs[id]=S.logs[id]||{};const L=S.logs[id][week]=S.logs[id][week]||{};if(!L.sets){L.sets=[];if(L.reps){L.sets[0]={kg:L.kg,reps:L.reps}}}while(L.sets.length<=s)L.sets.push({kg:'',reps:''});L.sets[s]=L.sets[s]||{kg:'',reps:''};L.sets[s][f]=v;if(f==='reps'&&v!=='')L.sets[s].t=Date.now();summarize(L);return L};
-  m.querySelectorAll('input[data-id]').forEach(i=>i.addEventListener('input',()=>{const id=i.dataset.id,v=i.value.trim()===''?'':i.value.replace(',','.');setVal(id,+i.dataset.s,i.dataset.f,v);if(v!=='')autoStart();save();const vl=$('#v-'+id);if(vl)vl.innerHTML=volLine(exById[id],week);const ft=$('#svol');if(ft)ft.textContent=nf(dayVol(day,week))+' kg'}));
+  m.querySelectorAll('input[data-id]').forEach(i=>i.addEventListener('input',()=>{const id=i.dataset.id,v=i.value.trim()===''?'':i.value.replace(',','.');setVal(id,+i.dataset.s,i.dataset.f,v);if(v!==''){autoStart();if(S.active){S.active.last=Date.now();S.active.idleAsked=0}}save();const vl=$('#v-'+id);if(vl)vl.innerHTML=volLine(exById[id],week);const ft=$('#svol');if(ft)ft.textContent=nf(dayVol(day,week))+' kg'}));
   m.querySelectorAll('input[data-f=kg]').forEach(i=>i.addEventListener('change',()=>{if(i.value.trim()==='')return;const id=i.dataset.id,s=+i.dataset.s;m.querySelectorAll(`input[data-id="${id}"][data-f=kg]`).forEach(o=>{if(+o.dataset.s>s&&o.value.trim()===''){o.value=i.value;setVal(id,+o.dataset.s,'kg',i.value.replace(',','.'))}});save()}));
   m.querySelectorAll('input[data-id]').forEach(i=>i.addEventListener('change',()=>{toast('Saved');dirty=true;soft()}));
   m.querySelectorAll('[data-note]').forEach(t=>{const fit=()=>{t.style.height='auto';t.style.height=t.scrollHeight+'px'};fit();t.addEventListener('input',()=>{S.wnotes=S.wnotes||{};const id=t.dataset.note;S.wnotes[id]=S.wnotes[id]||{};S.wnotes[id][week]=t.value;save();fit()});t.addEventListener('change',()=>toast('Note saved'))});
@@ -628,7 +628,9 @@ function drawPicker(){const q=$('#pq').value.trim().toLowerCase();const D=DAYS.f
   $('#plist').innerHTML=h||'<p class="muted" style="padding:16px">No matches.</p>';
   document.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{const id=b.dataset.pick;S.swaps=S.swaps||{};if(id==='__reset'||id===pSlot)delete S.swaps[pSlot];else S.swaps[pSlot]=id;save();closePicker();const y=scrollY;rWorkout();scrollTo(0,y);toast(id==='__reset'||id===pSlot?'Back to original':'Swapped to '+LIBM[id].name)})}
 $('#pq').addEventListener('input',drawPicker);$('#pclose').onclick=closePicker;
-$('#cmpYes').onclick=finishSession;$('#cmpNo').onclick=()=>$('#cmp').classList.remove('open');setInterval(()=>{if(S.active&&$('#cmp').classList.contains('open'))$('#cmpT').textContent=fmtDur(Date.now()-S.active.start)},1000);
+$('#cmpYes').onclick=finishSession;$('#cmpNo').onclick=()=>{$('#cmp').classList.remove('open');if(S.active&&S.active.endAt){delete S.active.endAt;save()}};
+function idleCheck(){const a=S.active;if(!a||!a.last||a.idleAsked)return;if(Date.now()-a.last<10*60e3)return;if($('#cmp').classList.contains('open'))return;a.idleAsked=1;a.endAt=a.last;save();const D=(a.block==='cali'?CALI:GYM)[a.day]||{name:'Workout'};$('#cmpH').textContent='Finished your session?';$('#cmpD').textContent=D.name+' · last set logged '+Math.round((Date.now()-a.last)/60e3)+' min ago';$('#cmpT').textContent=fmtDur(a.last-a.start);$('#cmpV').textContent='';$('#cmpP').innerHTML='';$('#cmp').classList.add('open')}
+setInterval(idleCheck,30e3);document.addEventListener('visibilitychange',()=>{if(!document.hidden)idleCheck()});setInterval(()=>{if(S.active&&$('#cmp').classList.contains('open'))$('#cmpT').textContent=fmtDur((S.active.endAt||Date.now())-S.active.start)},1000);
 $('#sbfin').onclick=finishSession;$('#sbx').onclick=cancelSession;$('#sbn').onclick=()=>{if(S.active){day=S.active.day;tab='workout';render();scrollTo(0,document.body.scrollHeight)}};
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;render();scrollTo(0,0)});
 $('#wkm').onclick=()=>{week=Math.max(1,week-1);render()};$('#wkp').onclick=()=>{week=Math.min(6,week+1);render()};
