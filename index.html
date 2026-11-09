@@ -612,7 +612,7 @@ function rSettings(){
     try{const f=new File([txt],name,{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:name});return}}catch(e){if(e.name==='AbortError')return}
     const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download=name;a.click();toast('Backup saved')};
   $('#imp').onclick=()=>$('#impf').click();
-  $('#impf').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{const o=JSON.parse(t);if(!o.logs||!o.daily)throw 0;S=migrate(o);save();week=S.weekOverride||autoWeek();const nl=Object.values(S.logs).reduce((a,x)=>a+Object.values(x).filter(v=>v&&v.reps!==''&&v.reps!=null).length,0),nd=Object.keys(S.daily).length;tab='workout';render();alert('Backup restored: '+nl+' workout entries and '+nd+' daily entries.')}catch(_){toast('That file is not a valid backup')}})};
+  $('#impf').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{const o=JSON.parse(t);if(!o.logs||!o.daily)throw 0;S=migrate(o);save();week=S.weekOverride||autoWeek();const nl=Object.values(S.logs).reduce((a,x)=>a+Object.values(x).filter(v=>v&&v.reps!==''&&v.reps!=null).length,0),nd=Object.keys(S.daily).length;tab='workout';alert('Backup restored: '+nl+' workout entries and '+nd+' daily entries.');location.reload()}catch(_){toast('That file is not a valid backup')}})};
   $('#rst').onclick=()=>{if(confirm('Clear all workout logs and start a new 6-week block from today? (Daily tracker entries are kept.) Save a backup first if unsure.')){S.logs={};S.start=iso(new Date());S.weekOverride=null;save();week=autoWeek();render();toast('New block started')}};
 }
 
